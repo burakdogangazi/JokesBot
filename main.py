@@ -1,16 +1,25 @@
-from distutils import command
 import discord;
-import os;
+import os
 import requests;
 import json;
-from discord.ext import commands
 from dotenv import load_dotenv;
 load_dotenv();
 
 TOKEN = os.getenv("TOKEN");
 
-client = discord.Client();
+client = discord.Client()
 
+
+def get_EmojiCode(): #public api
+    url = "https://ranmoji.herokuapp.com/emojis/api/v.1.0/"
+    emoji_API =  requests.request("GET",url)
+    
+    emojiJson = json.loads(emoji_API.text)
+    
+    emojiSection = emojiJson["emoji"]
+    
+    return(emojiSection)
+    
 
 def get_cnJokes(): # private api .env
     CNURL = os.getenv("CNURL");
@@ -28,7 +37,6 @@ def get_cnJokes(): # private api .env
     return(cnJokeSection)
 
 
-
 def get_dadJokes(): #private api .env
     DJURL = os.getenv("DJURL");
 
@@ -39,12 +47,11 @@ def get_dadJokes(): #private api .env
 
     djJson = json.loads(djresponse_API.text)
 
-    djSetup = djJson["body"][0]["setup"]
-    djPunchline =  djJson["body"][0]["punchline"]
+    a = djSetup = djJson["body"][0]["setup"]
+    b = djPunchline =  djJson["body"][0]["punchline"]
 
     djReturnString = "🤣🤣🤣 --- " + djSetup + " --- 🤣🤣🤣\n🤣🤣🤣 --- "  + djPunchline + " --- 🤣🤣🤣"
     return(djReturnString)
-
 
 
 @client.event
@@ -56,27 +63,18 @@ async def on_ready():
 
 		guild_count = guild_count + 1
 
-	print("Chronos Bot is in " + str(guild_count) + " guilds.");
+	print("Meme Bot is in " + str(guild_count) + " guilds.");
 
 
-@commands.command()
-async def displayMeme(ctx):
-    request = requests.get("https://memes.blademaker.tv/api?lang=en") #public api
-    res = request.json()
-    title = res["title"]
-    ups = res["ups"]
-    downs = res["downs"]
-    sub = res["subdreddit"]
-    m = discord.Embed(title = f"{title}\nSubreddit:{sub}")
-    m.set_image(url= res["image"])
-    m.set_footer(text="👎: {ups}  👍: {downs}")
-    await ctx.send(embed=m)
+@client.event
+async def on_member_join(member):
+    print(f'{member} has joined a server');
+     
+
+@client.event
+async def on_member_remove(member):
+    print(f'{member} has left a server');
     
-
-# müzik açsın youtube 
-# random emoji api https://ranmoji.herokuapp.com/emojis/api/v.1.0/
-# random meme apihttps://memes.blademaker.tv/ 
-# weather api
 
 @client.event
 async def on_message(message):
@@ -94,11 +92,11 @@ async def on_message(message):
     elif(message.content.startswith('-dadjoke')):
         joke = get_dadJokes()
         await message.channel.send(joke);
-        
-    elif(message.content.startswith('-meme')):
-         await message.channel.send(displayMeme);
-        
-
     
+    elif(message.content.startswith("-emjc")):
+        emj = get_EmojiCode()
+        await message.channel.send(emj)
+
+
 client.run(os.getenv("TOKEN"));
 
