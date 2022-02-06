@@ -90,7 +90,7 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
-    if (message.author == client.user): # mesaj bizdense dokunmayacak
+    if (message.author == client.user):
         return
     
     elif(message.content.startswith('-help')):
